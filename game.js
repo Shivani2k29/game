@@ -5,6 +5,8 @@ let msgContainer = document.querySelector(".msg-container");
 let msg = document.querySelector("#msg");
 
 let turnO = true;   //playerX, playerO
+let playerO = [];
+let playerX = [];
 
 const winPatterns = [
     [0, 1, 2],
@@ -19,20 +21,39 @@ const winPatterns = [
 
 const resetGame = () => {
     turnO = true;
+    playerO = [];
+    playerX = [];
     enableBoxes();
     msgContainer.classList.add("hide");
 }
 
-boxes.forEach((box) => {
-    box.addEventListener("click" , () => {
-        if(turnO){
-        box.innerText = "O";
-        turnO = false;
-        }else {
+boxes.forEach((box, index) => {
+    box.addEventListener("click", () => {
+
+        if (box.innerText !== "") return;
+
+        if (turnO) {
+            playerO.push(index);
+
+            if (playerO.length > 3) {
+                let removed = playerO.shift();
+                boxes[removed].innerText = "";
+            }
+
+            box.innerText = "O";
+            turnO = false;
+
+        } else {
+            playerX.push(index);
+
+            if (playerX.length > 3) {
+                let removed = playerX.shift();
+                boxes[removed].innerText = "";
+            }
+
             box.innerText = "X";
             turnO = true;
-        };
-        box.disabled = true;
+        }
 
         checkWinner();
     });
