@@ -7,6 +7,7 @@ let msg = document.querySelector("#msg");
 let turnO = true;   //playerX, playerO
 let playerO = [];
 let playerX = [];
+let selectedBox = null; // for shifting move
 
 const winPatterns = [
     [0, 1, 2],
@@ -23,42 +24,67 @@ const resetGame = () => {
     turnO = true;
     playerO = [];
     playerX = [];
+    selectedBox = null;
+
     enableBoxes();
     msgContainer.classList.add("hide");
-}
+
+    boxes.forEach(box => {
+        box.style.backgroundColor = "#ffffc7";
+    });
+};
+
+
 
 boxes.forEach((box, index) => {
     box.addEventListener("click", () => {
 
-        if (box.innerText !== "") return;
+        let currentPlayer = turnO ? "O" : "X";
+        let currentArray = turnO ? playerO : playerX;
 
-        if (turnO) {
-            playerO.push(index);
-
-            if (playerO.length > 3) {
-                let removed = playerO.shift();
-                boxes[removed].innerText = "";
+        // 🟢 CASE 1: Player has less than 3 moves → normal play
+        if (currentArray.length < 3) {
+            if (box.innerText === "") {
+                box.innerText = currentPlayer;
+                currentArray.push(index);
+                turnO = !turnO;
+                checkWinner();
             }
-
-            box.innerText = "O";
-            turnO = false;
-
-        } else {
-            playerX.push(index);
-
-            if (playerX.length > 3) {
-                let removed = playerX.shift();
-                boxes[removed].innerText = "";
-            }
-
-            box.innerText = "X";
-            turnO = true;
+            return;
         }
 
-        checkWinner();
+        // 🔵 CASE 2: Player has 3 moves → SHIFT MODE
+
+        // Step 1: Select your own box
+        if (selectedBox === null) {
+            if (box.innerText === currentPlayer) {
+                selectedBox = index;
+                box.style.backgroundColor = "yellow"; // highlight
+            }
+        }
+        // Step 2: Move to empty box
+        else {
+            if (box.innerText === "") {
+
+                // remove old
+                boxes[selectedBox].innerText = "";
+                boxes[selectedBox].style.backgroundColor = "#ffffc7";
+
+                // update array
+                let pos = currentArray.indexOf(selectedBox);
+                currentArray[pos] = index;
+
+                // place new
+                box.innerText = currentPlayer;
+
+                selectedBox = null;
+                turnO = !turnO;
+
+                checkWinner();
+            }
+        }
     });
 });
-
 
 
 const disableBoxes = (() => {
